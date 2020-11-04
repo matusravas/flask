@@ -14,14 +14,18 @@ def write_user_to_db_csv(user):
 
 
 def remove_user_from_db_csv(user_id):
-    with open('users.csv', 'r', newline='') as f:
-        reader = csv.DictReader(f, fieldnames, delimiter='\t')
-        
-        with open('users.csv', 'w', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames, delimiter='\t')
-            for row in reader:
-                if int(row['id']) != user_id:
-                    writer.writerow(row)
+    if user_id:
+        with open('users.csv', 'r', newline='') as f:
+            reader = csv.DictReader(f, fieldnames, delimiter='\t')
+            
+            with open('users.csv', 'w', newline='') as f:
+                writer = csv.DictWriter(f, fieldnames, delimiter='\t')
+                for row in reader:
+                    if int(row['id']) != user_id:
+                        writer.writerow(row)
+        return {f"User with ID {user_id} successfully removed"}
+    else:
+        return {f"User with ID {user_id} could not be removed"}
 
 
 def get_user_from_db_csv(request_data = None, user_id = None):
@@ -45,10 +49,11 @@ def insert_user_to_db(user):
     write_user_to_db_csv(user)
 
 
-@app.route('/removeUser<id>', methods=['DELETE'])
-def remove_user(user_id):
-    remove_user_from_db_csv(user_id)
-    res = Response({f"User with ID {user_id} successfully removed"})
+@app.route('/removeUser', methods=['DELETE'])
+def remove_user():
+    user_id = request.args.get('id')
+    result = remove_user_from_db_csv(user_id)
+    res = Response(result)
     res.status_code = 200
     return res
 
